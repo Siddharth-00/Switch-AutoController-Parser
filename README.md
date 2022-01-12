@@ -6,10 +6,20 @@ USAGE: python3 main.py
 
 COMMANDS:
 
-[CONFIG][var_name] = [VALUE][declare] [VAR_NAME] = [VALUE][autocontroller command]
+[CONFIG] [var_name] = [VALUE]
 
-[DURATION][if] [PREDICATE][endif]
+[DECLARE] [VAR_NAME] = [VALUE]
 
-[WHILE][predicate]
+[AUTOCONTROLLER COMMAND] [DURATION]
 
-[ENDWHILE][repeat] [N][endrepeat]
+[IF] [PREDICATE]
+
+[ENDIF]
+
+[WHILE] [predicate]
+
+[ENDWHILE]
+
+[REPEAT] [N]
+
+[ENDREPEAT]
