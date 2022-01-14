@@ -243,21 +243,52 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			memcpy_P(&tempCommand, &(m_command[commandIndex]), sizeof(Command));
 			switch (tempCommand.button)
 			{
-				case UP: // Up-Right
+				case UP:
 					ReportData->LY = STICK_MIN;
-					ReportData->LX = STICK_MAX;
-					break;
-
-				case LEFT:
-					ReportData->LX = STICK_MIN;
 					break;
 
 				case DOWN:
 					ReportData->LY = STICK_MAX;
 					break;
 
+				case LEFT:
+					ReportData->LX = STICK_MIN;
+					break;
+
 				case RIGHT:
 					ReportData->LX = STICK_MAX;
+					break;
+
+				case RUP:
+					ReportData->RY = STICK_MIN;
+					break;
+
+				case RDOWN:
+					ReportData->RY = STICK_MAX;
+					break;
+
+				case RLEFT:
+					ReportData->RX = STICK_MIN;
+					break;
+
+				case RRIGHT:
+					ReportData->RX = STICK_MAX;
+					break;
+
+				case DPAD_UP:
+					ReportData->HAT = HAT_TOP;
+					break;
+
+				case DPAD_DOWN:
+					ReportData->HAT = HAT_BOTTOM;
+					break;
+
+				case DPAD_LEFT:
+					ReportData->HAT = HAT_LEFT;
+					break;
+
+				case DPAD_RIGHT:
+					ReportData->HAT = HAT_RIGHT;
 					break;
 
 				case X:
@@ -320,46 +351,21 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 					ReportData->Button |= SWITCH_PLUS;
 					break;
 
-				/*case LCLICK:
+				case LCLICK:
 					ReportData->Button |= SWITCH_LCLICK;
 					break;
 
 				case RCLICK:
 					ReportData->Button |= SWITCH_RCLICK;
-					break;*/
-
-				case DPAD_UP:
-					ReportData->HAT = HAT_TOP;
-					break;
-
-				case DPAD_DOWN:
-					ReportData->HAT = HAT_BOTTOM;
-					break;
-
-				case DPAD_LEFT:
-					ReportData->HAT = HAT_LEFT;
-					break;
-
-				case DPAD_RIGHT:
-					ReportData->HAT = HAT_RIGHT;
-					break;
-
-				case RUN_RIGHT:
-					ReportData->HAT = HAT_RIGHT;
-					ReportData->Button |= SWITCH_B;
-					break;
-
-				case TRIGGERS:
-					ReportData->Button |= SWITCH_L | SWITCH_R;
 					break;
 
 				case HOME:
 					ReportData->Button |= SWITCH_HOME;
 					break;
 
-				/*case CAPTURE:
+				case CAPTURE:
 					ReportData->Button |= SWITCH_CAPTURE;
-					break;*/
+					break;
 
 				default:
 					// really nothing lol
