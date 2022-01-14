@@ -1,6 +1,7 @@
 from generator import generate_code
 from block import Program, Block, IF, Increment, Decrement, Assign
-controller_commands = set(['UP','DOWN','LEFT','RIGHT','X','Y','A','B','A_SPAM','B_SPAM','L','R','ZL','ZR','MINUS','PLUS','DPAD_UP','DPAD_DOWN','DPAD_LEFT','DPAD_RIGHT','TRIGGERS','HOME','NOTHING'])
+import re
+controller_commands = set(['NOTHING','A','B','X','Y','L','R','ZL','ZR','PLUS','MINUS','HOME','CAPTURE','LCLICK','UP','DOWN','LEFT','RIGHT','RCLICK','RUP','RDOWN','RLEFT','RRIGHT','DPAD_UP','DPAD_DOWN','DPAD_LEFT','DPAD_RIGHT','A_SPAM','B_SPAM'])
 
 def parse(source_path):
     #name = input("Name of project: ")
@@ -19,26 +20,17 @@ def parse(source_path):
     with open(source_path, 'r') as f:
         lines = f.readlines()
     for line in lines:
-        command = ''
-        args = ''
-        splitLine = [s.strip() for s in line.split(' ', 1)]
-        command = splitLine[0]
-        if len(splitLine) > 1:
-            args = splitLine[1]
-        if command in controller_commands:
-            assert args.isnumeric()
-            program.commands.append((command, args))
-            curr_command += 1
-        elif command == 'CONFIG':
-            var_name, val = [s.strip() for s in args.replace(' ', '').split('=')]
+        res = None
+        if (res := re.findall(r'CONFIG\s+(\S+)\s*=\s*(\d+)', line)):
+            var_name, val = res[0]
             assert val.isnumeric()
             program.config_variables.append((var_name, val))
-        elif command == 'DECLARE':
-            var_name, val = [s.strip() for s in args.replace(' ', '').split('=')]
+        elif (res := re.findall(r'DECLARE\s+(\S+)\s*=\s*(\d+)', line)):
+            var_name, val = res[0]
             assert val.isnumeric()
             program.variables.append((var_name, val))
-        elif command == 'ASSIGN':
-            var_name, val = [s.strip() for s in args.replace(' ', '').split('=')]
+        elif (res := re.findall(r'ASSIGN\s+(\S+)\s*=\s*(\d+)', line)):
+            var_name, val = res[0]
             assert val.isnumeric()
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
@@ -49,9 +41,8 @@ def parse(source_path):
             old_block.assignments.append(Assign(var_name, val))
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'INC':
-            var_name = args.strip()
-            assert ' ' not in var_name
+        elif (res := re.findall(r'INC\s+(\S+)', line)):
+            var_name = res[0]
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -61,8 +52,8 @@ def parse(source_path):
             old_block.assignments.append(Increment(var_name))
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'DEC':
-            var_name = args.strip()
+        elif (res := re.findall(r'DEC\s+(\S+)', line)):
+            var_name = res[0]
             assert ' ' not in var_name
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
@@ -73,8 +64,8 @@ def parse(source_path):
             old_block.assignments.append(Decrement(var_name))
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'IF':
-            predicate = args.strip()
+        elif (res := re.findall(r'IF\s+(.+)', line)):
+            predicate = res[0]
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -84,7 +75,7 @@ def parse(source_path):
             old_block.next_block = IF(predicate, curr_block, None)
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'ELSE':
+        elif (res := re.findall(r'ELSE', line)):
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -94,7 +85,7 @@ def parse(source_path):
             program.blocks[if_stack[-1][0]].next_block.false_block = curr_block
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'ENDIF':
+        elif (res := re.findall(r'ENDIF', line)):
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -107,8 +98,8 @@ def parse(source_path):
             for b in if_stack.pop()[1:]:
                 program.blocks[b].next_block = curr_block
             curr_start_command = curr_command + 1
-        elif command == 'WHILE':
-            predicate = args.strip()
+        elif (res := re.findall(r'WHILE\s+(.+)', line)):
+            predicate = res[0]
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -118,7 +109,7 @@ def parse(source_path):
             old_block.next_block = IF(predicate, curr_block, None)
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'ENDWHILE':
+        elif (res := re.findall(r'ENDWHILE', line)):
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -129,8 +120,8 @@ def parse(source_path):
             program.blocks[b].next_block.false_block = curr_block
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
-        elif command == 'REPEAT':
-            n = args.strip()
+        elif (res := re.findall(r'REPEAT\s+(\d+)', line)):
+            n = res[0]
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -143,7 +134,7 @@ def parse(source_path):
             program.blocks.append(old_block)
             curr_counter += 1
             curr_start_command = curr_command + 1
-        elif command == 'ENDREPEAT':
+        elif (res := re.findall(r'ENDREPEAT', line)):
             old_block = curr_block
             curr_block = Block(old_block.block_num + 1, None, [], None)
             old_block.command_range = (curr_start_command, curr_command)
@@ -154,6 +145,11 @@ def parse(source_path):
             program.blocks[b].next_block.false_block = curr_block
             program.blocks.append(old_block)
             curr_start_command = curr_command + 1
+        elif (res := re.findall(r'(^[^\s\+]+(?=[\+\s]*)|(?<=[\+\s])[^\s\+]+$|(?<=[\+\s])[^\s\+]+(?=[\+\s]))', line)):
+            assert all(command in controller_commands for command in res[:-1])
+            assert res[-1].isnumeric()
+            program.commands.append(("|".join(res[:-1]), res[-1]))
+            curr_command += 1
 
     old_block = curr_block
     old_block.command_range = (curr_start_command, curr_command)
