@@ -167,7 +167,7 @@ State_t state = PROCESS;
 
 uint8_t curr_process = 0;
 
-#define ECHOES 2
+#define ECHOES 5
 int echoes = 0;
 USB_JoystickReport_Input_t last_report;
 
@@ -377,7 +377,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 
 			durationCount++;
 
-			if (durationCount > tempCommand.duration)
+			if (durationCount >= tempCommand.duration)
 			{
 				commandIndex++;
 				durationCount = 0;
