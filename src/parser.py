@@ -150,7 +150,7 @@ def parse(source_path):
         elif (res := re.findall(r'(^[^\s\+]+(?=[\+\s]*)|(?<=[\+\s])[^\s\+]+$|(?<=[\+\s])[^\s\+]+(?=[\+\s]))', line)):
             assert all(command in controller_commands for command in res[:-1])
             assert res[-1].isnumeric()
-            program.commands.append(("|".join(res[:-1]), res[-1]))
+            program.commands.append((" | ".join(res[:-1]), res[-1]))
             curr_command += 1
 
     old_block = curr_block
