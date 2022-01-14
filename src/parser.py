@@ -21,6 +21,8 @@ def parse(source_path):
         lines = f.readlines()
     for line in lines:
         res = None
+        if (line.strip().startswith('--')):
+            continue
         if (res := re.findall(r'CONFIG\s+(\S+)\s*=\s*(\d+)', line)):
             var_name, val = res[0]
             assert val.isnumeric()
